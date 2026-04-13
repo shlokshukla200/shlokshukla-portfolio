@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-primary: #ffffff;
+  --color-brand-secondary: #a1a1aa;
+  --color-brand-accent: #00D2FF;
+  --color-tech-blue: #3A7BD5;
+  --color-electric-cyan: #00D2FF;
+  
+  --background-grain: url("https://grainy-gradients.vercel.app/noise.svg");
+}
+
+@layer base {
+  body {
+    @apply bg-[#050505] text-zinc-100 font-sans antialiased selection:bg-[#00D2FF] selection:text-black;
+  }
+  
+  @media (pointer: fine) {
+    body, a, button {
+      @apply cursor-none;
+    }
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-size: 40px 40px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+  }
+  
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10;
+  }
+
+  .scanning-line {
+    @apply absolute left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#00D2FF] to-transparent opacity-50;
+    animation: scan 3s linear infinite;
+  }
+
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    5% { opacity: 0.5; }
+    95% { opacity: 0.5; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .tech-gradient {
+    @apply bg-gradient-to-r from-[#00D2FF] to-[#3A7BD5];
+  }
+
+  .tech-border-glow {
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+  }
+}

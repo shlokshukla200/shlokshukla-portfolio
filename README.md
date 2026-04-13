@@ -1,20 +1,30 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Shlok Shukla | Applied AI & ML Enthusiast
 
-# Run and deploy your AI Studio app
+Computer Science student at Swami Keshvanand Institute of Technology (SKIT), Jaipur, focused on building intelligent systems that solve real-world problems. I specialize in transforming raw data into actionable insights through Machine Learning and Generative AI.
 
-This contains everything you need to run your app locally.
+## ðŸš€ About Me
+- **Core Focus**: Machine Learning, Artificial Intelligence, and Applied Generative AI.
+- **Goal**: Bridging the gap between predictive logic and task-oriented AI solutions to enhance institutional and social productivity.
+- **Leadership**: Serving as the **GeeksforGeeks Campus Ambassador**, where I've orchestrated city-wide hackathons and high-profile technical sessions.
 
-View your app in AI Studio: https://ai.studio/apps/b47307a7-cb87-45c5-9625-f77738c17e0f
+## ðŸ› ï¸ Technical Arsenal
+- **Languages**: Python, C++
+- **ML Frameworks**: Scikit-Learn, XGBoost, Random Forest
+- **Tools**: GenAI Prompting, Streamlit, Git, Vercel
+- **Competencies**: Supervised Learning, Feature Engineering, Hyperparameter Tuning, and Business English.
 
-## Run Locally
+## ðŸŒŸ Featured Projects
+- **Skill Audit Report (SAR)**: An AI-driven placement intelligence portal that automates student gap analysis and predicts industry readiness.
+- **LighthouseAI**: A predictive platform featuring a 'What-If Simulator' to quantify the impact of lifestyle habits on academic GPA.
+- **Soumya AI**: An anonymous, AI-powered healthcare assistant designed to provide mental health support and overcome social stigma.
+- **CTC Predictor**: An XGBoost-based regression model for real-time corporate salary estimation.
 
-**Prerequisites:**  Node.js
+## ðŸ“œ Certifications
+- **Google**: Prompting Essentials
+- **Oracle**: AI Foundations Associate
+- **Infosys**: Business English
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## ðŸ“¬ Let's Connect
+- **LinkedIn**: [linkedin.com/in/shlokshukla200](https://linkedin.com/in/shlokshukla200)
+- **Email**: shlokshukla200@gmail.com
+- **Portfolio**: [shlokshukla.vercel.app](https://shlokshukla.vercel.app)

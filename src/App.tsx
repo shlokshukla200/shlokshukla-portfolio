@@ -13,6 +13,7 @@ import NeuralField from "./components/NeuralField";
 import CursorFollower from "./components/CursorFollower";
 import { motion, useScroll, useSpring } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -51,6 +52,9 @@ export default function App() {
       
       {/* Vercel Web Analytics */}
       <Analytics />
+      
+      {/* Vercel Speed Insights */}
+      <SpeedInsights />
     </main>
   );
 }

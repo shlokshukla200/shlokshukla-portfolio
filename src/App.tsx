@@ -12,6 +12,7 @@ import Footer from "./components/Footer";
 import NeuralField from "./components/NeuralField";
 import CursorFollower from "./components/CursorFollower";
 import { motion, useScroll, useSpring } from "motion/react";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -47,6 +48,9 @@ export default function App() {
         <Certifications />
         <Footer />
       </div>
+      
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </main>
   );
 }

@@ -3,17 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useState } from "react";
 import Hero from "./components/Hero";
 import Projects from "./components/Projects";
+import MLPlayground from "./components/MLPlayground";
 import Experience from "./components/ImpactGrid";
 import TechStack from "./components/TechStack";
 import Certifications from "./components/Certifications";
 import Footer from "./components/Footer";
 import NeuralField from "./components/NeuralField";
 import CursorFollower from "./components/CursorFollower";
-import { motion, useScroll, useSpring } from "motion/react";
+import { motion, useScroll, useSpring, useMotionValueEvent } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+
+function ScrollTrainingProgress({ scrollYProgress }: { scrollYProgress: any }) {
+  const [loss, setLoss] = useState("2.50");
+  const [epoch, setEpoch] = useState(1);
+
+  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
+    // Map scroll 0 -> 1 to Loss 2.50 -> 0.02 and Epoch 1 -> 100
+    const currentLoss = Math.max(0.02, 2.50 - latest * 2.48).toFixed(2);
+    const currentEpoch = Math.min(100, Math.max(1, Math.floor(latest * 99) + 1));
+    setLoss(currentLoss);
+    setEpoch(currentEpoch);
+  });
+
+  return (
+    <div className="fixed top-4 right-4 sm:right-8 z-50 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-[#00D2FF]/30 text-[10px] font-mono text-[#00D2FF] uppercase tracking-wider shadow-[0_0_15px_rgba(0,210,255,0.15)] pointer-events-none">
+      <span className="flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#00D2FF] animate-pulse" />
+        EPOCH {epoch}/100
+      </span>
+      <span className="text-zinc-600">|</span>
+      <span>LOSS: {loss}</span>
+    </div>
+  );
+}
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -31,6 +57,9 @@ export default function App() {
         style={{ scaleX }}
       />
 
+      {/* Training Progress Telemetry Readout */}
+      <ScrollTrainingProgress scrollYProgress={scrollYProgress} />
+
       {/* Background Engine */}
       <NeuralField />
       
@@ -44,6 +73,7 @@ export default function App() {
       <div className="relative z-10">
         <Hero />
         <Projects />
+        <MLPlayground />
         <Experience />
         <TechStack />
         <Certifications />

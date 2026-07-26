@@ -124,12 +124,70 @@ export default function NeuralField() {
       ctx.fillStyle = "#050505";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Particles
+      // Draw Particles & Neural Connection Lines
       if (globalOpacity > 0) {
-        particles.forEach((p) => {
-          p.update();
-          p.draw();
-        });
+        // Update all particles first
+        particles.forEach((p) => p.update());
+
+        // Spatial Partitioning Grid for O(N) line connections (120px threshold)
+        const cellSize = 120;
+        const maxDistSq = cellSize * cellSize;
+        const cols = Math.max(1, Math.ceil(canvas.width / cellSize));
+        const rows = Math.max(1, Math.ceil(canvas.height / cellSize));
+
+        const grid: Particle[][][] = Array.from({ length: cols }, () =>
+          Array.from({ length: rows }, () => [])
+        );
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          const c = Math.min(cols - 1, Math.max(0, Math.floor(p.x / cellSize)));
+          const r = Math.min(rows - 1, Math.max(0, Math.floor(p.y / cellSize)));
+          grid[c][r].push(p);
+        }
+
+        // Draw connections between nearby particles
+        ctx.lineWidth = 0.6;
+        for (let c = 0; c < cols; c++) {
+          for (let r = 0; r < rows; r++) {
+            const cell = grid[c][r];
+            if (cell.length === 0) continue;
+
+            // Check current cell and adjacent forward cells to avoid duplicate lines
+            for (let nc = c; nc <= Math.min(c + 1, cols - 1); nc++) {
+              const startR = nc === c ? r : Math.max(0, r - 1);
+              const endR = Math.min(r + 1, rows - 1);
+              for (let nr = startR; nr <= endR; nr++) {
+                const neighborCell = grid[nc][nr];
+                for (let i = 0; i < cell.length; i++) {
+                  const p1 = cell[i];
+                  const startJ = nc === c && nr === r ? i + 1 : 0;
+                  for (let j = startJ; j < neighborCell.length; j++) {
+                    const p2 = neighborCell[j];
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distSq = dx * dx + dy * dy;
+
+                    if (distSq < maxDistSq) {
+                      const dist = Math.sqrt(distSq);
+                      const alpha = (1 - dist / cellSize) * 0.15 * globalOpacity;
+                      if (alpha > 0.005) {
+                        ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // Draw particles on top of network connections
+        particles.forEach((p) => p.draw());
       }
 
       animationFrameId = requestAnimationFrame(animate);

@@ -1,6 +1,54 @@
-import React, { useState, useRef } from "react";
-import { motion, useMotionValue, useTransform, useSpring } from "motion/react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { motion, useMotionValue, useTransform, useSpring, useInView } from "motion/react";
 import { ExternalLink, Github, Globe, ArrowRight, Cpu, Activity, Database } from "lucide-react";
+
+function parseAccuracyString(str: string) {
+  const match = str.match(/^(.*?)([-+]?\d*\.?\d+)(.*)$/);
+  if (!match) return { prefix: "", target: 0, decimals: 0, suffix: str };
+  
+  const prefix = match[1];
+  const target = parseFloat(match[2]);
+  const decimalMatch = match[2].split(".")[1];
+  const decimals = decimalMatch ? decimalMatch.length : 0;
+  const suffix = match[3];
+
+  return { prefix, target, decimals, suffix };
+}
+
+function AnimatedCounter({ accuracyStr }: { accuracyStr: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const { prefix, target, decimals, suffix } = useMemo(() => parseAccuracyString(accuracyStr), [accuracyStr]);
+  const [currentVal, setCurrentVal] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let startTime: number | null = null;
+    const duration = 1400; // 1.4 seconds count up
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // cubic ease out
+      setCurrentVal(eased * target);
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+
+    const animId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animId);
+  }, [isInView, target]);
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {currentVal.toFixed(decimals)}
+      {suffix}
+    </span>
+  );
+}
 
 const projects = [
   {
@@ -166,7 +214,7 @@ function ProjectCard({ project, index }: any) {
             <span className="block mt-4 font-mono text-[#00f2ff] text-[10px] relative uppercase tracking-wider">
               PERFORMANCE_METRIC
               <span className="block mt-1 text-xs animate-pulse text-glow normal-case tracking-normal">
-                {project.accuracy}
+                <AnimatedCounter accuracyStr={project.accuracy} />
               </span>
             </span>
           )}

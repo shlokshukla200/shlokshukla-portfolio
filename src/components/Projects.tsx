@@ -1,50 +1,52 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { motion, useMotionValue, useTransform, useSpring, useInView } from "motion/react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, useMotionValue, useTransform, useSpring, useInView, animate as animateValue } from "motion/react";
 import { ExternalLink, Github, Globe, ArrowRight, Cpu, Activity, Database } from "lucide-react";
 
-function parseAccuracyString(str: string) {
-  const match = str.match(/^(.*?)([-+]?\d*\.?\d+)(.*)$/);
-  if (!match) return { prefix: "", target: 0, decimals: 0, suffix: str };
-  
-  const prefix = match[1];
-  const target = parseFloat(match[2]);
-  const decimalMatch = match[2].split(".")[1];
-  const decimals = decimalMatch ? decimalMatch.length : 0;
-  const suffix = match[3];
-
-  return { prefix, target, decimals, suffix };
+/**
+ * Parses an accuracy string like "R2 Score = 0.9", "Accuracy = 87%", or
+ * "Mean Avg Error = ±4.6%" into a prefix, the numeric target, a suffix,
+ * and the decimal precision to animate with.
+ */
+function parseMetric(raw: string) {
+  const match = raw.match(/([-+±]?\s*)([\d.]+)(\s*%?)/);
+  if (!match) {
+    return { prefix: raw, target: 0, suffix: "", decimals: 0, hasNumber: false };
+  }
+  const [, symbolPrefix, numberStr, suffix] = match;
+  const idx = raw.indexOf(match[0]);
+  const prefix = raw.slice(0, idx) + symbolPrefix;
+  const decimals = numberStr.includes(".") ? numberStr.split(".")[1].length : 0;
+  return {
+    prefix,
+    target: parseFloat(numberStr),
+    suffix,
+    decimals,
+    hasNumber: true
+  };
 }
 
-function AnimatedCounter({ accuracyStr }: { accuracyStr: string }) {
+function AnimatedMetric({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const { prefix, target, decimals, suffix } = useMemo(() => parseAccuracyString(accuracyStr), [accuracyStr]);
-  const [currentVal, setCurrentVal] = useState(0);
+  const isInView = useInView(ref, { once: true, margin: "-10% 0px" });
+  const [display, setDisplay] = useState("0");
+  const { prefix, target, suffix, decimals, hasNumber } = parseMetric(value);
 
   useEffect(() => {
-    if (!isInView) return;
-    let startTime: number | null = null;
-    const duration = 1400; // 1.4 seconds count up
+    if (!isInView || !hasNumber) return;
+    const controls = animateValue(0, target, {
+      duration: 1.4,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (latest) => setDisplay(latest.toFixed(decimals))
+    });
+    return () => controls.stop();
+  }, [isInView, hasNumber, target, decimals]);
 
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // cubic ease out
-      setCurrentVal(eased * target);
-
-      if (progress < 1) {
-        requestAnimationFrame(step);
-      }
-    };
-
-    const animId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(animId);
-  }, [isInView, target]);
+  if (!hasNumber) return <span>{value}</span>;
 
   return (
     <span ref={ref}>
       {prefix}
-      {currentVal.toFixed(decimals)}
+      {display}
       {suffix}
     </span>
   );
@@ -213,8 +215,8 @@ function ProjectCard({ project, index }: any) {
           {project.accuracy && (
             <span className="block mt-4 font-mono text-[#00f2ff] text-[10px] relative uppercase tracking-wider">
               PERFORMANCE_METRIC
-              <span className="block mt-1 text-xs animate-pulse text-glow normal-case tracking-normal">
-                <AnimatedCounter accuracyStr={project.accuracy} />
+              <span className="block mt-1 text-xs text-glow normal-case tracking-normal">
+                <AnimatedMetric value={project.accuracy} />
               </span>
             </span>
           )}
@@ -236,7 +238,7 @@ export default function Projects() {
   return (
     <section id="projects" className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
       <div className="mb-16">
-        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">01 // Selected Projects</h2>
+        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">02 // Selected Projects</h2>
         <p className="text-3xl sm:text-4xl font-medium">Engineering Solutions</p>
       </div>
 

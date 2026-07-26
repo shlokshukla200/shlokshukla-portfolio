@@ -111,6 +111,62 @@ export default function NeuralField() {
       }
     };
 
+    // Spatial grid for cheap neighbor lookups (avoids O(n^2) over 800 particles)
+    const linkDistance = 120;
+    const cellSize = linkDistance;
+
+    const drawLinks = () => {
+      if (!ctx || globalOpacity <= 0) return;
+
+      const grid = new Map<string, Particle[]>();
+      const key = (cx: number, cy: number) => `${cx},${cy}`;
+
+      for (const p of particles) {
+        const cx = Math.floor(p.x / cellSize);
+        const cy = Math.floor(p.y / cellSize);
+        const k = key(cx, cy);
+        if (!grid.has(k)) grid.set(k, []);
+        grid.get(k)!.push(p);
+      }
+
+      ctx.lineWidth = 0.6;
+
+      for (const p of particles) {
+        const cx = Math.floor(p.x / cellSize);
+        const cy = Math.floor(p.y / cellSize);
+
+        for (let ox = -1; ox <= 1; ox++) {
+          for (let oy = -1; oy <= 1; oy++) {
+            const neighbors = grid.get(key(cx + ox, cy + oy));
+            if (!neighbors) continue;
+
+            for (const other of neighbors) {
+              if (other === p) continue;
+              // Avoid drawing each edge twice
+              if (other.x < p.x || (other.x === p.x && other.y < p.y)) continue;
+
+              const dx = other.x - p.x;
+              const dy = other.y - p.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+
+              if (dist < linkDistance) {
+                const strength = 1 - dist / linkDistance;
+                const boosted = p.isClustered || other.isClustered;
+                const maxAlpha = boosted ? 0.28 : 0.15;
+                const alpha = strength * maxAlpha * globalOpacity;
+
+                ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(other.x, other.y);
+                ctx.stroke();
+              }
+            }
+          }
+        }
+      }
+    };
+
     const animate = () => {
       // Update global opacity based on time
       const elapsed = Date.now() - startTime;
@@ -124,69 +180,10 @@ export default function NeuralField() {
       ctx.fillStyle = "#050505";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw Particles & Neural Connection Lines
+      // Draw Particles + Neural Links
       if (globalOpacity > 0) {
-        // Update all particles first
         particles.forEach((p) => p.update());
-
-        // Spatial Partitioning Grid for O(N) line connections (120px threshold)
-        const cellSize = 120;
-        const maxDistSq = cellSize * cellSize;
-        const cols = Math.max(1, Math.ceil(canvas.width / cellSize));
-        const rows = Math.max(1, Math.ceil(canvas.height / cellSize));
-
-        const grid: Particle[][][] = Array.from({ length: cols }, () =>
-          Array.from({ length: rows }, () => [])
-        );
-
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
-          const c = Math.min(cols - 1, Math.max(0, Math.floor(p.x / cellSize)));
-          const r = Math.min(rows - 1, Math.max(0, Math.floor(p.y / cellSize)));
-          grid[c][r].push(p);
-        }
-
-        // Draw connections between nearby particles
-        ctx.lineWidth = 0.6;
-        for (let c = 0; c < cols; c++) {
-          for (let r = 0; r < rows; r++) {
-            const cell = grid[c][r];
-            if (cell.length === 0) continue;
-
-            // Check current cell and adjacent forward cells to avoid duplicate lines
-            for (let nc = c; nc <= Math.min(c + 1, cols - 1); nc++) {
-              const startR = nc === c ? r : Math.max(0, r - 1);
-              const endR = Math.min(r + 1, rows - 1);
-              for (let nr = startR; nr <= endR; nr++) {
-                const neighborCell = grid[nc][nr];
-                for (let i = 0; i < cell.length; i++) {
-                  const p1 = cell[i];
-                  const startJ = nc === c && nr === r ? i + 1 : 0;
-                  for (let j = startJ; j < neighborCell.length; j++) {
-                    const p2 = neighborCell[j];
-                    const dx = p1.x - p2.x;
-                    const dy = p1.y - p2.y;
-                    const distSq = dx * dx + dy * dy;
-
-                    if (distSq < maxDistSq) {
-                      const dist = Math.sqrt(distSq);
-                      const alpha = (1 - dist / cellSize) * 0.15 * globalOpacity;
-                      if (alpha > 0.005) {
-                        ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        // Draw particles on top of network connections
+        drawLinks();
         particles.forEach((p) => p.draw());
       }
 

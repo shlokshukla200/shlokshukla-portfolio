@@ -3,43 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from "react";
 import Hero from "./components/Hero";
 import Projects from "./components/Projects";
-import MLPlayground from "./components/MLPlayground";
 import Experience from "./components/ImpactGrid";
 import TechStack from "./components/TechStack";
 import Certifications from "./components/Certifications";
 import Footer from "./components/Footer";
 import NeuralField from "./components/NeuralField";
 import CursorFollower from "./components/CursorFollower";
-import { motion, useScroll, useSpring, useMotionValueEvent } from "motion/react";
+import MLPlayground from "./components/MLPlayground";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-
-function ScrollTrainingProgress({ scrollYProgress }: { scrollYProgress: any }) {
-  const [loss, setLoss] = useState("2.50");
-  const [epoch, setEpoch] = useState(1);
-
-  useMotionValueEvent(scrollYProgress, "change", (latest: number) => {
-    // Map scroll 0 -> 1 to Loss 2.50 -> 0.02 and Epoch 1 -> 100
-    const currentLoss = Math.max(0.02, 2.50 - latest * 2.48).toFixed(2);
-    const currentEpoch = Math.min(100, Math.max(1, Math.floor(latest * 99) + 1));
-    setLoss(currentLoss);
-    setEpoch(currentEpoch);
-  });
-
-  return (
-    <div className="fixed top-4 right-4 sm:right-8 z-50 flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-[#00D2FF]/30 text-[10px] font-mono text-[#00D2FF] uppercase tracking-wider shadow-[0_0_15px_rgba(0,210,255,0.15)] pointer-events-none">
-      <span className="flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#00D2FF] animate-pulse" />
-        EPOCH {epoch}/100
-      </span>
-      <span className="text-zinc-600">|</span>
-      <span>LOSS: {loss}</span>
-    </div>
-  );
-}
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -49,6 +24,13 @@ export default function App() {
     restDelta: 0.001
   });
 
+  // "Training progress" readout — maps scroll position to a descending loss
+  // value and an epoch count, purely cosmetic, reuses existing scroll progress.
+  const loss = useTransform(scrollYProgress, [0, 1], [2.5, 0.02]);
+  const lossDisplay = useTransform(loss, (v) => v.toFixed(2));
+  const epoch = useTransform(scrollYProgress, [0, 1], [0, 10]);
+  const epochDisplay = useTransform(epoch, (v) => Math.min(10, Math.floor(v) + 1));
+
   return (
     <main className="relative min-h-screen selection:bg-[#00D2FF] selection:text-black overflow-x-hidden">
       {/* Progress Bar */}
@@ -57,8 +39,16 @@ export default function App() {
         style={{ scaleX }}
       />
 
-      {/* Training Progress Telemetry Readout */}
-      <ScrollTrainingProgress scrollYProgress={scrollYProgress} />
+      {/* Training Progress Readout */}
+      <div className="fixed top-4 right-4 sm:right-6 z-50 hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 font-mono text-[10px] uppercase tracking-wider text-zinc-400 pointer-events-none">
+        <span className="flex items-center gap-1.5">
+          epoch <motion.span className="text-[#00f2ff]">{epochDisplay}</motion.span>/10
+        </span>
+        <span className="w-px h-3 bg-white/10" />
+        <span className="flex items-center gap-1.5">
+          loss <motion.span className="text-[#00f2ff]">{lossDisplay}</motion.span>
+        </span>
+      </div>
 
       {/* Background Engine */}
       <NeuralField />
@@ -72,8 +62,8 @@ export default function App() {
       {/* Content */}
       <div className="relative z-10">
         <Hero />
-        <Projects />
         <MLPlayground />
+        <Projects />
         <Experience />
         <TechStack />
         <Certifications />

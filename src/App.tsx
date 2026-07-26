@@ -11,8 +11,7 @@ import Certifications from "./components/Certifications";
 import Footer from "./components/Footer";
 import NeuralField from "./components/NeuralField";
 import CursorFollower from "./components/CursorFollower";
-import MLPlayground from "./components/MLPlayground";
-import { motion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useScroll, useSpring } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
@@ -24,13 +23,6 @@ export default function App() {
     restDelta: 0.001
   });
 
-  // "Training progress" readout — maps scroll position to a descending loss
-  // value and an epoch count, purely cosmetic, reuses existing scroll progress.
-  const loss = useTransform(scrollYProgress, [0, 1], [2.5, 0.02]);
-  const lossDisplay = useTransform(loss, (v) => v.toFixed(2));
-  const epoch = useTransform(scrollYProgress, [0, 1], [0, 10]);
-  const epochDisplay = useTransform(epoch, (v) => Math.min(10, Math.floor(v) + 1));
-
   return (
     <main className="relative min-h-screen selection:bg-[#00D2FF] selection:text-black overflow-x-hidden">
       {/* Progress Bar */}
@@ -38,17 +30,6 @@ export default function App() {
         className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#00D2FF] to-[#3A7BD5] z-50 origin-left"
         style={{ scaleX }}
       />
-
-      {/* Training Progress Readout */}
-      <div className="fixed top-4 right-4 sm:right-6 z-50 hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 font-mono text-[10px] uppercase tracking-wider text-zinc-400 pointer-events-none">
-        <span className="flex items-center gap-1.5">
-          epoch <motion.span className="text-[#00f2ff]">{epochDisplay}</motion.span>/10
-        </span>
-        <span className="w-px h-3 bg-white/10" />
-        <span className="flex items-center gap-1.5">
-          loss <motion.span className="text-[#00f2ff]">{lossDisplay}</motion.span>
-        </span>
-      </div>
 
       {/* Background Engine */}
       <NeuralField />
@@ -62,7 +43,6 @@ export default function App() {
       {/* Content */}
       <div className="relative z-10">
         <Hero />
-        <MLPlayground />
         <Projects />
         <Experience />
         <TechStack />

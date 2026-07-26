@@ -65,7 +65,7 @@ export default function Experience() {
   return (
     <section id="experience" className="py-24 px-4 sm:px-6 max-w-4xl mx-auto">
       <div className="mb-16">
-        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">03 // Professional Path</h2>
+        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">02 // Professional Path</h2>
         <p className="text-3xl font-medium">Experience Timeline</p>
       </div>
 

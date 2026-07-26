@@ -238,7 +238,7 @@ export default function Projects() {
   return (
     <section id="projects" className="py-24 px-4 sm:px-6 max-w-7xl mx-auto">
       <div className="mb-16">
-        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">02 // Selected Projects</h2>
+        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">01 // Selected Projects</h2>
         <p className="text-3xl sm:text-4xl font-medium">Engineering Solutions</p>
       </div>
 

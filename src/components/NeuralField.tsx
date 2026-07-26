@@ -12,7 +12,7 @@ export default function NeuralField() {
 
     let animationFrameId: number;
     let particles: Particle[] = [];
-    const particleCount = 800;
+    const particleCount = 140;
     const mouse = { x: -1000, y: -1000, active: false };
     const clusterRadius = 150;
     const clusterStrength = 0.08;
@@ -37,7 +37,7 @@ export default function NeuralField() {
         this.y = Math.random() * canvas!.height;
         this.vx = (Math.random() - 0.5) * 0.4;
         this.vy = (Math.random() - 0.5) * 0.4;
-        this.size = Math.random() * 1.2 + 0.2;
+        this.size = Math.random() * 1.6 + 0.6;
         this.baseColor = "rgba(0, 242, 255, 0.2)"; // Cyber Cyan
         this.activeColor = "rgba(75, 0, 130, 0.6)"; // Deep Indigo
         this.isClustered = false;
@@ -111,8 +111,9 @@ export default function NeuralField() {
       }
     };
 
-    // Spatial grid for cheap neighbor lookups (avoids O(n^2) over 800 particles)
-    const linkDistance = 120;
+    // Spatial grid for cheap neighbor lookups
+    const linkDistance = 170;
+    const maxLinksPerNode = 3;
     const cellSize = linkDistance;
 
     const drawLinks = () => {
@@ -130,39 +131,47 @@ export default function NeuralField() {
       }
 
       ctx.lineWidth = 0.6;
+      const drawn = new Set<string>();
 
       for (const p of particles) {
         const cx = Math.floor(p.x / cellSize);
         const cy = Math.floor(p.y / cellSize);
 
+        // Gather nearby candidates, then keep only the closest few —
+        // this is what makes it read as a sparse "network" rather than a web.
+        const candidates: { other: Particle; dist: number }[] = [];
+
         for (let ox = -1; ox <= 1; ox++) {
           for (let oy = -1; oy <= 1; oy++) {
             const neighbors = grid.get(key(cx + ox, cy + oy));
             if (!neighbors) continue;
-
             for (const other of neighbors) {
               if (other === p) continue;
-              // Avoid drawing each edge twice
-              if (other.x < p.x || (other.x === p.x && other.y < p.y)) continue;
-
               const dx = other.x - p.x;
               const dy = other.y - p.y;
               const dist = Math.sqrt(dx * dx + dy * dy);
-
-              if (dist < linkDistance) {
-                const strength = 1 - dist / linkDistance;
-                const boosted = p.isClustered || other.isClustered;
-                const maxAlpha = boosted ? 0.28 : 0.15;
-                const alpha = strength * maxAlpha * globalOpacity;
-
-                ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(other.x, other.y);
-                ctx.stroke();
-              }
+              if (dist < linkDistance) candidates.push({ other, dist });
             }
           }
+        }
+
+        candidates.sort((a, b) => a.dist - b.dist);
+
+        for (const { other, dist } of candidates.slice(0, maxLinksPerNode)) {
+          const edgeKey = p.x < other.x ? `${p.x},${p.y}-${other.x},${other.y}` : `${other.x},${other.y}-${p.x},${p.y}`;
+          if (drawn.has(edgeKey)) continue;
+          drawn.add(edgeKey);
+
+          const strength = 1 - dist / linkDistance;
+          const boosted = p.isClustered || other.isClustered;
+          const maxAlpha = boosted ? 0.22 : 0.09;
+          const alpha = strength * maxAlpha * globalOpacity;
+
+          ctx.strokeStyle = `rgba(0, 242, 255, ${alpha})`;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(other.x, other.y);
+          ctx.stroke();
         }
       }
     };

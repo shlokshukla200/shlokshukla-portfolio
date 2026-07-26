@@ -16,9 +16,9 @@ const radarSkills = [
   { skill: "Data Analysis", level: 80 }
 ];
 
-const RADAR_SIZE = 340;
+const RADAR_SIZE = 420;
 const RADAR_CENTER = RADAR_SIZE / 2;
-const RADAR_RADIUS = RADAR_SIZE / 2 - 48;
+const RADAR_RADIUS = RADAR_SIZE / 2 - 80;
 
 function pointOnRadar(index: number, total: number, value: number) {
   // value is 0-1, angle starts at top (-90deg) and goes clockwise
@@ -26,7 +26,8 @@ function pointOnRadar(index: number, total: number, value: number) {
   const r = RADAR_RADIUS * value;
   return {
     x: RADAR_CENTER + r * Math.cos(angle),
-    y: RADAR_CENTER + r * Math.sin(angle)
+    y: RADAR_CENTER + r * Math.sin(angle),
+    cos: Math.cos(angle)
   };
 }
 
@@ -103,13 +104,14 @@ function SkillRadar() {
 
         {/* labels */}
         {radarSkills.map((s, i) => {
-          const p = pointOnRadar(i, total, 1.28);
+          const p = pointOnRadar(i, total, 1.2);
+          const anchor = p.cos > 0.25 ? "start" : p.cos < -0.25 ? "end" : "middle";
           return (
             <text
               key={s.skill}
               x={p.x}
               y={p.y}
-              textAnchor="middle"
+              textAnchor={anchor}
               dominantBaseline="middle"
               className="fill-zinc-400"
               style={{ fontSize: 10, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}
@@ -127,7 +129,7 @@ export default function TechStack() {
   return (
     <section className="py-24 border-y border-white/5 bg-white/[0.01]">
       <div className="px-6 max-w-7xl mx-auto mb-12">
-        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">04 // Technical Core</h2>
+        <h2 className="text-sm font-mono uppercase tracking-[0.3em] text-[#00D2FF] mb-4">03 // Technical Core</h2>
         <p className="text-3xl font-medium">Skills</p>
       </div>
 

@@ -144,6 +144,7 @@ function ProjectCard({ project, index }: any) {
               href={project.link} 
               target="_blank" 
               rel="noopener noreferrer"
+              aria-label={`View ${project.title} on ${project.link.includes('github') ? 'GitHub' : 'external website'}`}
               className="p-3 rounded-full bg-white/5 border border-white/10 text-zinc-400 hover:text-[#00f2ff] hover:border-[#00f2ff]/50 hover:bg-[#00f2ff]/10 transition-all duration-300"
             >
               {project.link.includes('github') ? <Github size={20} /> : <Globe size={20} />}

@@ -26,6 +26,7 @@ export default function Footer() {
               href="https://linkedin.com/in/shlokshukla200" 
               target="_blank" 
               rel="noopener noreferrer"
+              aria-label="Visit Shlok Shukla's LinkedIn profile"
               className="p-4 rounded-full border border-white/10 hover:bg-white/5 transition-colors"
             >
               <Linkedin size={20} />
@@ -34,12 +35,14 @@ export default function Footer() {
               href="https://github.com/shlokshukla200" 
               target="_blank" 
               rel="noopener noreferrer"
+              aria-label="Visit Shlok Shukla's GitHub profile"
               className="p-4 rounded-full border border-white/10 hover:bg-white/5 transition-colors"
             >
               <Github size={20} />
             </a>
             <a 
               href="mailto:shlokshukla200@gmail.com" 
+              aria-label="Send an email to Shlok Shukla"
               className="p-4 rounded-full border border-white/10 hover:bg-white/5 transition-colors"
             >
               <Mail size={20} />
